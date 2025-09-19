@@ -41,7 +41,7 @@ func MapBaseResponse(w http.ResponseWriter, r *http.Request, data interface{}, e
 		reqId = requestID
 	}
 	dataByte, _ := json.Marshal(data)
-	fmt.Printf("[RESPONSE: [%s] %s] REQUEST_ID: %s DATA: %s", r.Method, r.URL.String(), reqId, string(dataByte))
+	fmt.Printf("[RESPONSE: [%s] %s] REQUEST_ID: %s DATA: %s\n", r.Method, r.URL.String(), reqId, string(dataByte))
 
 	var httpErr *errorutils.HttpErrorImpl
 	if err != nil {

@@ -1,6 +1,25 @@
 # AWB Stock Allocation (Simulation)
 ## There's a feature in Belli we use to allocate the AWB number.
 
+## Quickstart
+### Run one of these commands on your command prompt:
+```shell
+  make run_http
+```
+or
+```shell
+  go mod tidy; go run cmd/http/*.go
+```
+
+### To generate the API docs using swagger, run this command:
+```shell
+  make swag
+```
+or
+```shell
+  swag init -g cmd/http/main.go ./docs; swag fmt
+```
+
 ## The goals:
 ### AWB Stock Allocation Creation:
     Terms:
@@ -44,30 +63,10 @@
     5. No deletion
 
 ### Notes:
-    - find the most suitable HTTP response
-    - use a clear message but not too sensitive
-    - you can adjust the status to be a label or an integer (it's up to you to decide, as long as user can see the status clearly)
+- find the most suitable HTTP response
+- use a clear message but not too sensitive
+- you can adjust the status to be a label or an integer (it's up to you to decide, as long as user can see the status clearly)
+- the dummy data is only stored in the list
+- <b>[nice to have]</b> handle race condition for AWB number usage
+- <b>[nice to have]</b> proper commit message (using conventional commits)
 
-```text
-nice to have:
-- handle race condition for AWB number usage
-```
-
-## Quickstart
-### Run one of these commands on your command prompt:
-```shell
-  make run_http
-```
-or
-```shell
-  go mod tidy; go run cmd/http/*.go
-```
-
-### To generate the API docs using swagger, run this command:
-```shell
-  make swag
-```
-or
-```shell
-  swag init -g cmd/http/main.go ./docs; swag fmt
-```
