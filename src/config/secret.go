@@ -9,15 +9,9 @@ func ViperBind() {
 	viper.BindEnv("SWAGGER_USERNAME")
 	viper.BindEnv("SWAGGER_PASSWORD")
 
-	// Binding Database
-	viper.BindEnv("DB_HOST")
-	viper.BindEnv("DB_USER")
-	viper.BindEnv("DB_PASSWORD")
-	viper.BindEnv("DB_NAME")
-	viper.BindEnv("DB_PORT")
-	viper.BindEnv("SSL_MODE")
-	viper.BindEnv("TZ")
-
-	// Binding GCP Cred
-	viper.BindEnv("GOOGLE_APPLICATION_CREDENTIALS_BASE64")
+	viper.BindEnv("HOST_ADDRESS")
+	viper.BindEnv("HOST_PORT")
+	viper.BindEnv("HOST_WRITE_TIMEOUT")
+	viper.BindEnv("HOST_READ_TIMEOUT")
+	viper.BindEnv("HOST_IDLE_TIMEOUT")
 }

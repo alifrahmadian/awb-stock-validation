@@ -3,9 +3,10 @@ package httputils
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/audricimanuel/awb-stock-allocation/utils"
+	"github.com/audricimanuel/awb-stock-allocation/utils/constants"
 	"github.com/audricimanuel/errorutils"
-	"go-chi-boilerplate/utils"
-	"go-chi-boilerplate/utils/constants"
+	"github.com/pkg/errors"
 	"math"
 	"net/http"
 )
@@ -28,8 +29,11 @@ type (
 )
 
 // MapBaseResponse map response
-func MapBaseResponse(w http.ResponseWriter, r *http.Request, data interface{}, err errorutils.HttpError, meta *BaseMeta) {
-	var errMsg *string
+func MapBaseResponse(w http.ResponseWriter, r *http.Request, data interface{}, err error, meta *BaseMeta) {
+	var (
+		errMsg     *string
+		httpStatus = http.StatusOK
+	)
 
 	// Check Request ID
 	reqId := "-"
@@ -39,14 +43,21 @@ func MapBaseResponse(w http.ResponseWriter, r *http.Request, data interface{}, e
 	dataByte, _ := json.Marshal(data)
 	fmt.Printf("[RESPONSE: [%s] %s] REQUEST_ID: %s DATA: %s", r.Method, r.URL.String(), reqId, string(dataByte))
 
-	statusCode, message := errorutils.GetStatusCode(err)
-	if message != errorutils.SUCCESS {
-		errMsg = &message
+	var httpErr *errorutils.HttpErrorImpl
+	if err != nil {
+		httpStatus = http.StatusInternalServerError
+		if errors.As(err, &httpErr) {
+			statusCode, message := errorutils.GetStatusCode(err)
+			if message != errorutils.SUCCESS {
+				errMsg = &message
+			}
+			httpStatus = statusCode
+		}
 	}
 
 	// Payload Response
 	payload := BaseResponse{
-		Status: statusCode,
+		Status: httpStatus,
 		Data:   data,
 		Error:  errMsg,
 		Meta:   meta,
@@ -58,7 +69,7 @@ func MapBaseResponse(w http.ResponseWriter, r *http.Request, data interface{}, e
 	// Write Response
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Date", utils.TimeNow().Format(constants.FORMAT_DATETIME_TEXT))
-	w.WriteHeader(statusCode)
+	w.WriteHeader(httpStatus)
 	w.Write(jsonResponse)
 }
 

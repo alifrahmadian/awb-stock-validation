@@ -2,18 +2,18 @@ package http
 
 import (
 	"fmt"
+	"github.com/audricimanuel/awb-stock-allocation/src/config"
+	"github.com/audricimanuel/awb-stock-allocation/src/internals/controller"
+	"github.com/audricimanuel/awb-stock-allocation/src/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	httpSwagger "github.com/swaggo/http-swagger"
-	"go-chi-boilerplate/src/config"
-	"go-chi-boilerplate/src/internals/controller"
-	"go-chi-boilerplate/src/middleware"
 	"net/http"
 )
 
 func RegisterRouter(
 	cfg config.Config,
-	exampleController controller.ExampleController,
+	awbStockHandler controller.AWBStockController,
 	// register new controllers here
 ) chi.Router {
 	r := chi.NewRouter()
@@ -38,7 +38,7 @@ func RegisterRouter(
 		w.Write([]byte(staticText))
 	})
 
-	r.Get("/example", exampleController.GetExample)
+	r.Get("/awb-stocks", awbStockHandler.GetAWBStock)
 
 	return r
 }

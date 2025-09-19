@@ -2,7 +2,7 @@ package paramquery
 
 import (
 	"context"
-	"go-chi-boilerplate/src/middleware"
+	"github.com/audricimanuel/awb-stock-allocation/src/middleware"
 )
 
 type (

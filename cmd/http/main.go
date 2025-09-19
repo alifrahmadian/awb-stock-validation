@@ -3,14 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/audricimanuel/awb-stock-allocation/docs"
+	"github.com/audricimanuel/awb-stock-allocation/src/config"
+	"github.com/audricimanuel/awb-stock-allocation/src/internals/controller"
+	"github.com/audricimanuel/awb-stock-allocation/src/internals/repository"
+	"github.com/audricimanuel/awb-stock-allocation/src/internals/service"
+	httpServer "github.com/audricimanuel/awb-stock-allocation/src/server/http"
 	"github.com/sirupsen/logrus"
-	"go-chi-boilerplate/docs"
-	"go-chi-boilerplate/src/config"
-	"go-chi-boilerplate/src/database"
-	"go-chi-boilerplate/src/internals/controller"
-	"go-chi-boilerplate/src/internals/repository"
-	"go-chi-boilerplate/src/internals/service"
-	httpServer "go-chi-boilerplate/src/server/http"
 	"net/http"
 	"os"
 	"os/signal"
@@ -18,8 +17,7 @@ import (
 )
 
 func setSwaggerInfo() {
-	docs.SwaggerInfo.Title = "Microservice Template Golang Example"
-	docs.SwaggerInfo.Description = "Example boilerplate"
+	docs.SwaggerInfo.Title = "AWB Stock Allocation Mini-test"
 	docs.SwaggerInfo.Version = "1.0"
 	docs.SwaggerInfo.BasePath = "/"
 	docs.SwaggerInfo.Schemes = []string{"https", "http"}
@@ -32,17 +30,14 @@ func main() {
 		logrus.Fatal(err)
 	}
 
-	// initialize mongodb connection
-	databaseCollection := database.NewDatabaseCollection(cfg)
-
 	// repositories
-	exampleRepo := repository.NewExampleRepository(databaseCollection)
+	awbStockRepo := repository.NewAWBStockRepository()
 
 	// services
-	exampleService := service.NewExampleService(exampleRepo)
+	awbStockService := service.NewAWBStockService(awbStockRepo)
 
 	// controllers
-	exampleController := controller.NewExampleController(exampleService)
+	awbStockController := controller.NewAWBStockController(awbStockService)
 
 	// set swagger info
 	setSwaggerInfo()
@@ -50,7 +45,7 @@ func main() {
 	// registering router
 	router := httpServer.RegisterRouter(
 		cfg,
-		exampleController,
+		awbStockController,
 		// register controllers in here
 	)
 
@@ -71,7 +66,7 @@ func runServer(cfg config.Config, route http.Handler) {
 
 	// Run Server
 	go func() {
-		logrus.Printf("⇨ http server started on %s\n", server.Addr)
+		logrus.Printf("⇨ http server started on [%s]\n", server.Addr)
 		server.ListenAndServe()
 	}()
 

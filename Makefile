@@ -1,5 +1,5 @@
 run_http:
-	go run cmd/http/*.go
+	go mod tidy; go run cmd/http/*.go
 
 swag:
-	swag init -g cmd/http/main.go ./docs
+	swag init -g cmd/http/main.go ./docs; swag fmt

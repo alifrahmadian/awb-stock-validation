@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"go-chi-boilerplate/src/config"
+	"github.com/audricimanuel/awb-stock-allocation/src/config"
 	"io"
 	"log"
 	"net/http"

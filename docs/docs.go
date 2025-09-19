@@ -15,9 +15,9 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/example": {
+        "/awb-stocks": {
             "get": {
-                "description": "\"Just an example\"",
+                "description": "\"List of AWB stocks\"",
                 "consumes": [
                     "application/json"
                 ],
@@ -25,9 +25,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Example"
+                    "AWB Stock"
                 ],
-                "summary": "Example API",
+                "summary": "List of AWB stocks",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -60,31 +60,16 @@ const docTemplate = `{
         "httputils.BaseResponse": {
             "type": "object",
             "properties": {
-                "code": {
-                    "type": "string"
-                },
                 "data": {},
-                "errors": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/httputils.Errors"
-                    }
-                },
-                "message": {
+                "error_message": {
                     "type": "string"
                 },
                 "meta": {
                     "$ref": "#/definitions/httputils.BaseMeta"
                 },
-                "server_time": {
+                "status": {
                     "type": "integer"
                 }
-            }
-        },
-        "httputils.Errors": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
             }
         }
     }

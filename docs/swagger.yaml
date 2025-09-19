@@ -12,32 +12,22 @@ definitions:
     type: object
   httputils.BaseResponse:
     properties:
-      code:
-        type: string
       data: {}
-      errors:
-        items:
-          $ref: '#/definitions/httputils.Errors'
-        type: array
-      message:
+      error_message:
         type: string
       meta:
         $ref: '#/definitions/httputils.BaseMeta'
-      server_time:
+      status:
         type: integer
-    type: object
-  httputils.Errors:
-    additionalProperties:
-      type: string
     type: object
 info:
   contact: {}
 paths:
-  /example:
+  /awb-stocks:
     get:
       consumes:
       - application/json
-      description: '"Just an example"'
+      description: '"List of AWB stocks"'
       produces:
       - application/json
       responses:
@@ -45,7 +35,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/httputils.BaseResponse'
-      summary: Example API
+      summary: List of AWB stocks
       tags:
-      - Example
+      - AWB Stock
 swagger: "2.0"
