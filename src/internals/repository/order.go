@@ -28,5 +28,7 @@ func (r *OrderRepositoryImpl) CreateOrder(order *model.Order) (*model.Order, err
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	return nil, nil
+	*r.list = append(*r.list, *order)
+
+	return order, nil
 }

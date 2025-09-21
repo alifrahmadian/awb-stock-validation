@@ -10,7 +10,7 @@ type (
 	AWBStockRepository interface {
 		// TODO: create the functions needed to implement here
 		GetAWBStock() ([]*model.AWBStock, error)
-		// GetAWBStockByAWB(awbNumber string) (*model.AWBStock, error)
+		GetAWBStockByAWB(AWBNumber string) (*model.AWBStock, error)
 	}
 
 	AWBStockRepositoryImpl struct {
@@ -35,4 +35,9 @@ func (r *AWBStockRepositoryImpl) GetAWBStock() ([]*model.AWBStock, error) {
 	}
 
 	return awbStocks, nil
+}
+
+func (r *AWBStockRepositoryImpl) GetAWBStockByAWB(AWBNumber string) (*model.AWBStock, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
 }
