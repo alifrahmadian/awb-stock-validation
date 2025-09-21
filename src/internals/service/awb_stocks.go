@@ -2,11 +2,13 @@ package service
 
 import (
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/repository"
+	"github.com/audricimanuel/awb-stock-allocation/src/model"
 )
 
 type (
 	AWBStockService interface {
 		// TODO: create the functions needed to implement here
+		GetAWBStock() ([]*model.AWBStock, error)
 	}
 
 	AWBStockServiceImpl struct {
@@ -18,4 +20,8 @@ func NewAWBStockService(awbStockRepository repository.AWBStockRepository) AWBSto
 	return &AWBStockServiceImpl{
 		awbStockRepository: awbStockRepository,
 	}
+}
+
+func (s *AWBStockServiceImpl) GetAWBStock() ([]*model.AWBStock, error) {
+	return s.awbStockRepository.GetAWBStock()
 }

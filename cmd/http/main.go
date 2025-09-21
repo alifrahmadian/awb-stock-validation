@@ -3,17 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"time"
+
 	"github.com/audricimanuel/awb-stock-allocation/docs"
 	"github.com/audricimanuel/awb-stock-allocation/src/config"
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/controller"
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/repository"
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/service"
+	"github.com/audricimanuel/awb-stock-allocation/src/model"
 	httpServer "github.com/audricimanuel/awb-stock-allocation/src/server/http"
 	"github.com/sirupsen/logrus"
-	"net/http"
-	"os"
-	"os/signal"
-	"time"
 )
 
 func setSwaggerInfo() {
@@ -31,7 +33,7 @@ func main() {
 	}
 
 	// repositories
-	awbStockRepo := repository.NewAWBStockRepository()
+	awbStockRepo := repository.NewAWBStockRepository(&model.AWBStockList)
 
 	// services
 	awbStockService := service.NewAWBStockService(awbStockRepo)
