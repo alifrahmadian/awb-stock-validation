@@ -25,5 +25,29 @@ var (
 			Status:    "not_in_use",
 		},
 		// TODO: add more data here
+		{
+			AWBNumber: "001-10008272",
+			Status:    "not_in_use",
+		},
+		{
+			AWBNumber: "001-10726855",
+			Status:    "not_in_use",
+		},
+		{
+			AWBNumber: "001-36748596",
+			Status:    "not_in_use",
+		},
+		{
+			AWBNumber: "0001-63748392",
+			Status:    "not_in_use",
+		},
+		{
+			AWBNumber: "001-12345675",
+			Status:    "not_in_use",
+		},
+		{
+			AWBNumber: "001-12345686",
+			Status:    "not_in_use",
+		},
 	}
 )
