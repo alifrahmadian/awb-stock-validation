@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/dto"
@@ -36,11 +35,11 @@ func (a *AWBStockControllerImpl) GetAWBStock(w http.ResponseWriter, r *http.Requ
 	// TODO: implement the API to view lift of AWB stocks
 	meta := httputils.SetBaseMeta(1, 10, 100)
 	var err error
-	httputils.MapBaseResponse(w, r, nil, err, &meta)
+	// httputils.MapBaseResponse(w, r, nil, err, &meta)
 
 	awbStocks, err := a.awbStockService.GetAWBStock()
 	if err != nil {
-		http.Error(w, "internal server error", http.StatusInternalServerError)
+		httputils.MapBaseResponse(w, r, nil, err, &meta)
 		return
 	}
 
@@ -55,5 +54,5 @@ func (a *AWBStockControllerImpl) GetAWBStock(w http.ResponseWriter, r *http.Requ
 		resp = append(resp, r)
 	}
 
-	json.NewEncoder(w).Encode(resp)
+	httputils.MapBaseResponse(w, r, resp, err, &meta)
 }
