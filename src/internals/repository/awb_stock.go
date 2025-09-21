@@ -4,13 +4,14 @@ import (
 	"sync"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
+	e "github.com/audricimanuel/awb-stock-allocation/utils/errors"
 )
 
 type (
 	AWBStockRepository interface {
 		// TODO: create the functions needed to implement here
 		GetAWBStock() ([]*model.AWBStock, error)
-		GetAWBStockByAWB(AWBNumber string) (*model.AWBStock, error)
+		GetAWBStockByAWBNumber(AWBNumber string) (*model.AWBStock, error)
 	}
 
 	AWBStockRepositoryImpl struct {
@@ -37,7 +38,19 @@ func (r *AWBStockRepositoryImpl) GetAWBStock() ([]*model.AWBStock, error) {
 	return awbStocks, nil
 }
 
-func (r *AWBStockRepositoryImpl) GetAWBStockByAWB(AWBNumber string) (*model.AWBStock, error) {
+func (r *AWBStockRepositoryImpl) GetAWBStockByAWBNumber(AWBNumber string) (*model.AWBStock, error) {
+	var err error
+
 	r.mu.RLock()
 	defer r.mu.RUnlock()
+
+	for _, v := range *r.list {
+		if v.AWBNumber == AWBNumber {
+			return &v, nil
+		} else {
+			err = e.ErrAWBNotFound
+		}
+	}
+
+	return nil, err
 }
