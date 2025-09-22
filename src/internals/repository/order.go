@@ -9,7 +9,7 @@ import (
 // TODO: the interface and implementation under here
 type (
 	OrderRepository interface {
-		CreateOrder(order *model.Order) (*model.Order, error)
+		CreateOrder(order *model.Order) *model.Order
 	}
 
 	OrderRepositoryImpl struct {
@@ -24,11 +24,11 @@ func NewOrderRepository(list *[]model.Order) OrderRepository {
 	}
 }
 
-func (r *OrderRepositoryImpl) CreateOrder(order *model.Order) (*model.Order, error) {
+func (r *OrderRepositoryImpl) CreateOrder(order *model.Order) *model.Order {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	*r.list = append(*r.list, *order)
 
-	return order, nil
+	return order
 }

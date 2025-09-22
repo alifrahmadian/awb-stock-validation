@@ -34,12 +34,18 @@ func main() {
 
 	// repositories
 	awbStockRepo := repository.NewAWBStockRepository(&model.AWBStockList)
+	orderRepo := repository.NewOrderRepository(&model.OrderList)
 
 	// services
 	awbStockService := service.NewAWBStockService(awbStockRepo)
+	orderService := service.NewOrderService(
+		orderRepo,
+		awbStockRepo,
+	)
 
 	// controllers
 	awbStockController := controller.NewAWBStockController(awbStockService)
+	orderController := controller.NewOrderController(orderService, logrus.New())
 
 	// set swagger info
 	setSwaggerInfo()
@@ -48,6 +54,7 @@ func main() {
 	router := httpServer.RegisterRouter(
 		cfg,
 		awbStockController,
+		orderController,
 		// register controllers in here
 	)
 

@@ -4,14 +4,16 @@ import (
 	"sync"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
-	e "github.com/audricimanuel/awb-stock-allocation/utils/errors"
+	"github.com/audricimanuel/awb-stock-allocation/utils/constants"
 )
 
 type (
 	AWBStockRepository interface {
 		// TODO: create the functions needed to implement here
 		GetAWBStock() ([]*model.AWBStock, error)
-		GetAWBStockByAWBNumber(AWBNumber string) (*model.AWBStock, error)
+		GetAWBStockByAWBNumber(AWBNumber string) *model.AWBStock
+		UpdateAWBStatus(AWBNumber string)
+		CreateAWBStock(AWBStock *model.AWBStock) *model.AWBStock
 	}
 
 	AWBStockRepositoryImpl struct {
@@ -38,19 +40,35 @@ func (r *AWBStockRepositoryImpl) GetAWBStock() ([]*model.AWBStock, error) {
 	return awbStocks, nil
 }
 
-func (r *AWBStockRepositoryImpl) GetAWBStockByAWBNumber(AWBNumber string) (*model.AWBStock, error) {
-	var err error
-
+func (r *AWBStockRepositoryImpl) GetAWBStockByAWBNumber(AWBNumber string) *model.AWBStock {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
 	for _, v := range *r.list {
 		if v.AWBNumber == AWBNumber {
-			return &v, nil
-		} else {
-			err = e.ErrAWBNotFound
+			return &v
 		}
 	}
 
-	return nil, err
+	return nil
+}
+
+func (r *AWBStockRepositoryImpl) UpdateAWBStatus(AWBNumber string) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	for i := range *r.list {
+		if (*r.list)[i].AWBNumber == AWBNumber {
+			(*r.list)[i].Status = constants.AWB_STATUS_IN_USE
+		}
+	}
+}
+
+func (r *AWBStockRepositoryImpl) CreateAWBStock(AWBStock *model.AWBStock) *model.AWBStock {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	*r.list = append(*r.list, *AWBStock)
+
+	return AWBStock
 }
