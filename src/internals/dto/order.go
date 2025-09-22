@@ -8,6 +8,7 @@ type CreateOrderRequest struct {
 }
 
 type CreateOrderResponse struct {
+	ID          int64   `json:"id"`
 	AWBNumber   string  `json:"awb_number"`
 	Sender      string  `json:"sender"`
 	Receiver    string  `json:"receiver"`

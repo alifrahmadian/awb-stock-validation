@@ -102,6 +102,7 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 	}
 
 	resp := &dto.CreateOrderResponse{
+		ID:          orderModel.ID,
 		AWBNumber:   orderModel.AWBNumber,
 		Sender:      orderModel.Sender,
 		Receiver:    orderModel.Receiver,

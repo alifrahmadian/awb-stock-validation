@@ -3,6 +3,7 @@ package model
 type (
 	Order struct {
 		// TODO: add other fields if needed (ex: created_at, etc)
+		ID          int64   `json:"id"`
 		AWBNumber   string  `json:"awb_number"`
 		Sender      string  `json:"sender"`
 		Receiver    string  `json:"receiver"`

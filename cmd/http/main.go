@@ -34,7 +34,10 @@ func main() {
 
 	// repositories
 	awbStockRepo := repository.NewAWBStockRepository(&model.AWBStockList)
-	orderRepo := repository.NewOrderRepository(&model.OrderList)
+	orderRepo := repository.NewOrderRepository(
+		&model.OrderList,
+		int64(len(model.OrderList)),
+	)
 
 	// services
 	awbStockService := service.NewAWBStockService(awbStockRepo)
