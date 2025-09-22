@@ -7,4 +7,5 @@ var (
 	ErrOrderSenderRequired      = errors.New("sender required")
 	ErrOrderReceiverRequired    = errors.New("receiver required")
 	ErrOrderTotalWeightRequired = errors.New("total weight required")
+	ErrOrderNotFound            = errors.New("order not found")
 )
