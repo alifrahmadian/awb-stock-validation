@@ -51,6 +51,22 @@ const docTemplate = `{
                     "Order"
                 ],
                 "summary": "Get Order List",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "example": 1,
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "\"001-10000001\"",
+                        "description": "Search by AWB number substring",
+                        "name": "awb",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -72,6 +88,17 @@ const docTemplate = `{
                     "Order"
                 ],
                 "summary": "Create Order",
+                "parameters": [
+                    {
+                        "description": "Order request payload",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreateOrderRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -95,6 +122,15 @@ const docTemplate = `{
                     "Order"
                 ],
                 "summary": "Get Order by Order ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -118,6 +154,24 @@ const docTemplate = `{
                     "Order"
                 ],
                 "summary": "Update Order Status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Order status payload. Allowed values: 1=PENDING, 2=CONFIRM, 3=SHIPPED, 4=COMPLETED, 5=CANCELLED",
+                        "name": "payload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateOrderStatusRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -130,6 +184,31 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.CreateOrderRequest": {
+            "type": "object",
+            "properties": {
+                "awb_number": {
+                    "type": "string"
+                },
+                "receiver": {
+                    "type": "string"
+                },
+                "sender": {
+                    "type": "string"
+                },
+                "total_weight": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.UpdateOrderStatusRequest": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
         "httputils.BaseMeta": {
             "type": "object",
             "properties": {

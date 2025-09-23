@@ -44,7 +44,8 @@ func NewOrderController(orderService service.OrderService, logger *logrus.Logger
 // @Description	"Create an Order"
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	httputils.BaseResponse
+// @Param			payload	body		dto.CreateOrderRequest	true	"Order request payload"
+// @Success		200		{object}	httputils.BaseResponse
 // @Router			/orders [post]
 func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req *dto.CreateOrderRequest
@@ -138,6 +139,11 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 // @Tags			Order
 // @Summary		Update Order Status
 // @Description	"Update an Order Status"
+//
+// @Param			id		path	int								true	"Order ID"
+//
+// @Param			payload	body	dto.UpdateOrderStatusRequest	true	"Order status payload. Allowed values: 1=PENDING, 2=CONFIRM, 3=SHIPPED, 4=COMPLETED, 5=CANCELLED"
+//
 // @Accept			json
 // @Produce		json
 // @Success		200	{object}	httputils.BaseResponse
@@ -221,6 +227,7 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 // @Tags			Order
 // @Summary		Get Order by Order ID
 // @Description	"Get an Order by Order ID"
+// @Param			id	path	int	true	"Order ID"
 // @Accept			json
 // @Produce		json
 // @Success		200	{object}	httputils.BaseResponse
@@ -282,7 +289,9 @@ func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Reques
 // @Description	"Get an Order List"
 // @Accept			json
 // @Produce		json
-// @Success		200	{object}	httputils.BaseResponse
+// @Param			page	query		int		false	"Page number"						example(1)
+// @Param			awb		query		string	false	"Search by AWB number substring"	example("001-10000001")
+// @Success		200		{object}	httputils.BaseResponse
 // @Router			/orders [get]
 func (a *OrderControllerImpl) GetOrders(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
