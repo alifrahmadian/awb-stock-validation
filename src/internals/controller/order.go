@@ -19,6 +19,7 @@ import (
 type (
 	OrderController interface {
 		CreateOrder(w http.ResponseWriter, r *http.Request)
+		GetOrderById(w http.ResponseWriter, r *http.Request)
 		UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 	}
 
@@ -165,5 +166,52 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 	}
 
 	a.logger.WithField("awb_number", order.ID).Info("order status updated successfully")
+	httputils.MapBaseResponse(w, r, resp, nil, nil)
+}
+
+func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		err = errors.New("invalid order id")
+
+		a.logger.WithFields(logrus.Fields{
+			"id_param": idStr,
+			"error":    err.Error(),
+		}).Warn("invalid order id")
+
+		httputils.MapBaseResponse(w, r, nil, err, nil)
+		return
+	}
+
+	order, err := a.orderService.GetOrderById(id)
+	if err != nil {
+		a.logger.WithFields(logrus.Fields{
+			"order_id": id,
+			"error":    err.Error(),
+		}).Warn("failed to fetch order")
+
+		httputils.MapBaseResponse(w, r, nil, err, nil)
+		return
+	}
+
+	resp := &dto.CreateOrderResponse{
+		ID:          order.ID,
+		AWBNumber:   order.AWBNumber,
+		Sender:      order.Sender,
+		Receiver:    order.Receiver,
+		TotalWeight: order.TotalWeight,
+		TotalPrice:  order.TotalPrice,
+		Status:      order.Status,
+	}
+
+	a.logger.WithFields(logrus.Fields{
+		"order_id":     order.ID,
+		"awb_number":   order.AWBNumber,
+		"sender":       order.Sender,
+		"receiver":     order.Receiver,
+		"total_weight": order.TotalWeight,
+	}).Info("successfully fetched order")
+
 	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }

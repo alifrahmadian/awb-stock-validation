@@ -35,7 +35,6 @@ func (a *AWBStockControllerImpl) GetAWBStock(w http.ResponseWriter, r *http.Requ
 	// TODO: implement the API to view lift of AWB stocks
 	meta := httputils.SetBaseMeta(1, 10, 100)
 	var err error
-	// httputils.MapBaseResponse(w, r, nil, err, &meta)
 
 	awbStocks, err := a.awbStockService.GetAWBStock()
 	if err != nil {

@@ -13,6 +13,7 @@ type (
 	OrderService interface {
 		CreateOrder(order *model.Order) (*model.Order, error)
 		UpdateOrderStatus(id int64, status int) (*model.Order, error)
+		GetOrderById(id int64) (*model.Order, error)
 	}
 
 	OrderServiceImpl struct {
@@ -111,4 +112,13 @@ func (s *OrderServiceImpl) UpdateOrderStatus(id int64, status int) (*model.Order
 	}
 
 	return updatedOrder, nil
+}
+
+func (s *OrderServiceImpl) GetOrderById(id int64) (*model.Order, error) {
+	order, err := s.orderRepository.GetOrderById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return order, nil
 }
