@@ -11,7 +11,8 @@ import (
 type (
 	OrderRepository interface {
 		CreateOrder(order *model.Order) *model.Order
-		UpdateOrder(id int64, status string) (*model.Order, error)
+		GetOrderById(id int64) (*model.Order, error)
+		UpdateOrderStatus(id int64, status string) (*model.Order, error)
 	}
 
 	OrderRepositoryImpl struct {
@@ -39,7 +40,20 @@ func (r *OrderRepositoryImpl) CreateOrder(order *model.Order) *model.Order {
 	return &(*r.list)[len(*r.list)-1]
 }
 
-func (r *OrderRepositoryImpl) UpdateOrder(id int64, status string) (*model.Order, error) {
+func (r *OrderRepositoryImpl) GetOrderById(id int64) (*model.Order, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	for i := range *r.list {
+		if (*r.list)[i].ID == id {
+			return &(*r.list)[i], nil
+		}
+	}
+
+	return nil, e.ErrOrderNotFound
+}
+
+func (r *OrderRepositoryImpl) UpdateOrderStatus(id int64, status string) (*model.Order, error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 

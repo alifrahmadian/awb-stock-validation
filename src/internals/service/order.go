@@ -12,6 +12,7 @@ import (
 type (
 	OrderService interface {
 		CreateOrder(order *model.Order) (*model.Order, error)
+		UpdateOrderStatus(id int64, status int) (*model.Order, error)
 	}
 
 	OrderServiceImpl struct {
@@ -50,17 +51,12 @@ func (s *OrderServiceImpl) CreateOrder(order *model.Order) (*model.Order, error)
 			return nil, e.ErrAWBHasBeenUsed
 		} else {
 			orderModel := s.orderRepository.CreateOrder(order)
-			s.awbStockRepository.UpdateAWBStatus(orderModel.AWBNumber)
+			s.awbStockRepository.UpdateAWBStatus(orderModel.AWBNumber, constants.AWB_STATUS_IN_USE)
 
 			return orderModel, nil
 		}
 	}
 
-	// if awbStock is available in DB
-	// do the awb validation based on convention
-	// if valid, create the AWB and set the status "in_use"
-
-	// validate awb
 	isAWBValid := utils.ValidateAWBNumber(order.AWBNumber)
 	if !isAWBValid {
 		return nil, e.ErrAWBInvalid
@@ -75,4 +71,44 @@ func (s *OrderServiceImpl) CreateOrder(order *model.Order) (*model.Order, error)
 	orderModel := s.orderRepository.CreateOrder(order)
 
 	return orderModel, nil
+}
+
+func (s *OrderServiceImpl) UpdateOrderStatus(id int64, status int) (*model.Order, error) {
+	orderStatus, err := utils.MapInputStatusToString(status)
+	if err != nil {
+		return nil, err
+	}
+
+	order, err := s.orderRepository.GetOrderById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	switch order.Status {
+	case constants.ORDER_STATUS_PENDING:
+		if orderStatus != constants.ORDER_STATUS_CONFIRM && orderStatus != constants.ORDER_STATUS_CANCELLED {
+			return nil, e.ErrOrderStatusPendingValidation
+		}
+	case constants.ORDER_STATUS_CONFIRM:
+		if orderStatus != constants.ORDER_STATUS_SHIPPED && orderStatus != constants.ORDER_STATUS_CANCELLED {
+			return nil, e.ErrOrderStatusConfirmValidation
+		}
+	case constants.ORDER_STATUS_SHIPPED:
+		if orderStatus != constants.ORDER_STATUS_COMPLETED {
+			return nil, e.ErrOrderStatusShippedValidation
+		}
+	case constants.ORDER_STATUS_COMPLETED, constants.ORDER_STATUS_CANCELLED:
+		return nil, e.ErrOrderStatusFinal
+	}
+
+	updatedOrder, err := s.orderRepository.UpdateOrderStatus(id, orderStatus)
+	if err != nil {
+		return nil, err
+	}
+
+	if updatedOrder.Status == constants.ORDER_STATUS_CANCELLED {
+		s.awbStockRepository.UpdateAWBStatus(updatedOrder.AWBNumber, constants.AWB_STATUS_NOT_IN_USE)
+	}
+
+	return updatedOrder, nil
 }

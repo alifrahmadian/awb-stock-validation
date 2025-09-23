@@ -2,13 +2,16 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/dto"
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/service"
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
 	e "github.com/audricimanuel/awb-stock-allocation/utils/errors"
 	"github.com/audricimanuel/awb-stock-allocation/utils/httputils"
+	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
 
@@ -16,6 +19,7 @@ import (
 type (
 	OrderController interface {
 		CreateOrder(w http.ResponseWriter, r *http.Request)
+		UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
 	}
 
 	OrderControllerImpl struct {
@@ -111,9 +115,55 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 		Status:      orderModel.Status,
 	}
 
-	a.logger.WithField("awb_number", orderModel.AWBNumber).Info("order created successfully")
+	a.logger.WithField("awb_number", orderModel.ID).Info("order created successfully")
 
 	meta := httputils.SetBaseMeta(1, 10, 100)
 
 	httputils.MapBaseResponse(w, r, resp, err, &meta)
+}
+
+func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.Request) {
+	var req *dto.UpdateOrderStatusRequest
+
+	idStr := chi.URLParam(r, "id")
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		err = errors.New("invalid order id")
+
+		a.logger.WithError(err).Error(err.Error())
+		httputils.MapBaseResponse(w, r, nil, err, nil)
+		return
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		a.logger.WithError(err).Error(err.Error())
+		httputils.MapBaseResponse(w, r, nil, err, nil)
+		return
+	}
+
+	a.logger.WithFields(logrus.Fields{
+		"id":     id,
+		"status": req.Status,
+	}).Info("updating order status")
+
+	order, err := a.orderService.UpdateOrderStatus(id, req.Status)
+	if err != nil {
+		a.logger.WithError(err).Error(err.Error())
+		httputils.MapBaseResponse(w, r, nil, err, nil)
+		return
+	}
+
+	resp := &dto.CreateOrderResponse{
+		ID:          order.ID,
+		AWBNumber:   order.AWBNumber,
+		Sender:      order.Sender,
+		Receiver:    order.Receiver,
+		TotalWeight: order.TotalWeight,
+		TotalPrice:  order.TotalPrice,
+		Status:      order.Status,
+	}
+
+	a.logger.WithField("awb_number", order.ID).Info("order status updated successfully")
+	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }

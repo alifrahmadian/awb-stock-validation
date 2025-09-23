@@ -16,3 +16,7 @@ type CreateOrderResponse struct {
 	TotalPrice  int     `json:"total_price"`
 	Status      string  `json:"status"`
 }
+
+type UpdateOrderStatusRequest struct {
+	Status int `json:"status"`
+}

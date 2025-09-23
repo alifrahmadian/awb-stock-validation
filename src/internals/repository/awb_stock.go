@@ -4,7 +4,6 @@ import (
 	"sync"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
-	"github.com/audricimanuel/awb-stock-allocation/utils/constants"
 )
 
 type (
@@ -12,7 +11,7 @@ type (
 		// TODO: create the functions needed to implement here
 		GetAWBStock() ([]*model.AWBStock, error)
 		GetAWBStockByAWBNumber(awbNumber string) *model.AWBStock
-		UpdateAWBStatus(awbNumber string)
+		UpdateAWBStatus(awbNumber string, status string)
 		CreateAWBStock(awbStock *model.AWBStock) *model.AWBStock
 	}
 
@@ -53,13 +52,13 @@ func (r *AWBStockRepositoryImpl) GetAWBStockByAWBNumber(awbNumber string) *model
 	return nil
 }
 
-func (r *AWBStockRepositoryImpl) UpdateAWBStatus(awbNumber string) {
+func (r *AWBStockRepositoryImpl) UpdateAWBStatus(awbNumber string, status string) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for i := range *r.list {
 		if (*r.list)[i].AWBNumber == awbNumber {
-			(*r.list)[i].Status = constants.AWB_STATUS_IN_USE
+			(*r.list)[i].Status = status
 		}
 	}
 }
