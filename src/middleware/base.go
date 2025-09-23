@@ -5,12 +5,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/audricimanuel/awb-stock-allocation/src/config"
 	"io"
 	"log"
 	"net/http"
 	"runtime/debug"
 	"strings"
+
+	"github.com/audricimanuel/awb-stock-allocation/src/config"
 )
 
 type (

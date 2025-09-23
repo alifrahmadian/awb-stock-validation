@@ -3,12 +3,13 @@ package httputils
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"net/http"
+
 	"github.com/audricimanuel/awb-stock-allocation/utils"
 	"github.com/audricimanuel/awb-stock-allocation/utils/constants"
 	"github.com/audricimanuel/errorutils"
 	"github.com/pkg/errors"
-	"math"
-	"net/http"
 )
 
 type (

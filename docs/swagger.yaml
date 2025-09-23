@@ -38,4 +38,63 @@ paths:
       summary: List of AWB stocks
       tags:
       - AWB Stock
+  /orders:
+    get:
+      consumes:
+      - application/json
+      description: '"Get an Order List"'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httputils.BaseResponse'
+      summary: Get Order List
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      description: '"Create an Order"'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httputils.BaseResponse'
+      summary: Create Order
+      tags:
+      - Order
+  /orders/{id}:
+    get:
+      consumes:
+      - application/json
+      description: '"Get an Order by Order ID"'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httputils.BaseResponse'
+      summary: Get Order by Order ID
+      tags:
+      - Order
+  /orders/{id}/status:
+    put:
+      consumes:
+      - application/json
+      description: '"Update an Order Status"'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/httputils.BaseResponse'
+      summary: Update Order Status
+      tags:
+      - Order
 swagger: "2.0"

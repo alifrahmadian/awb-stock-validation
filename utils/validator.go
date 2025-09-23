@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	log "github.com/sirupsen/logrus"
 	"net/http"
 	"reflect"
 	"strings"
 	"time"
+
+	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
 // GetValidatorController return validator controller

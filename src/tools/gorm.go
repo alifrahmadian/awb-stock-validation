@@ -2,9 +2,10 @@ package tools
 
 import (
 	"context"
+	"log"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"log"
 )
 
 func NewGormDB(ctx context.Context, dsn string) *gorm.DB {

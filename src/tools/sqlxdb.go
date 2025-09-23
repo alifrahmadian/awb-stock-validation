@@ -2,10 +2,11 @@ package tools
 
 import (
 	"context"
+	"time"
+
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/sirupsen/logrus"
-	"time"
 )
 
 func NewSqlxDsn(ctx context.Context, driver, dsn string) *sqlx.DB {

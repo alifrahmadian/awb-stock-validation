@@ -12,6 +12,7 @@ import (
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
 	e "github.com/audricimanuel/awb-stock-allocation/utils/errors"
 	"github.com/audricimanuel/awb-stock-allocation/utils/httputils"
+	"github.com/audricimanuel/errorutils"
 	"github.com/go-chi/chi/v5"
 	"github.com/sirupsen/logrus"
 )
@@ -38,20 +39,20 @@ func NewOrderController(orderService service.OrderService, logger *logrus.Logger
 	}
 }
 
-// @Tags Order
-// @Summary Create Order
-// @Description "Create an Order"
-// @Accept json
-// @Produce json
-// @Success 200 {object} httputils.BaseResponse
-// @Router /orders [post]
+// @Tags			Order
+// @Summary		Create Order
+// @Description	"Create an Order"
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	httputils.BaseResponse
+// @Router			/orders [post]
 func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req *dto.CreateOrderRequest
 
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		a.logger.WithError(err).Warn("failed to decode request body")
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInternalServer, nil)
 		return
 	}
 
@@ -59,7 +60,7 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 		err = e.ErrOrderAWBRequired
 
 		a.logger.WithError(err).Warn(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 		err = e.ErrOrderSenderRequired
 
 		a.logger.WithError(err).Warn(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -75,7 +76,7 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 		err = e.ErrOrderReceiverRequired
 
 		a.logger.WithError(err).Warn(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -83,7 +84,7 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 		err = e.ErrOrderTotalWeightRequired
 
 		a.logger.WithError(err).Warn(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -104,7 +105,18 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 	orderModel, err := a.orderService.CreateOrder(order)
 	if err != nil {
 		a.logger.WithError(err).Warn(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+
+		if err == e.ErrAWBHasBeenUsed {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrAWBInvalid {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInternalServer.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -120,18 +132,16 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 
 	a.logger.WithField("awb_number", orderModel.ID).Info("order created successfully")
 
-	meta := httputils.SetBaseMeta(1, 10, 100)
-
-	httputils.MapBaseResponse(w, r, resp, err, &meta)
+	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }
 
-// @Tags Order
-// @Summary Update Order Status
-// @Description "Update an Order Status"
-// @Accept json
-// @Produce json
-// @Success 200 {object} httputils.BaseResponse
-// @Router /orders/{id}/status [put]
+// @Tags			Order
+// @Summary		Update Order Status
+// @Description	"Update an Order Status"
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	httputils.BaseResponse
+// @Router			/orders/{id}/status [put]
 func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.Request) {
 	var req *dto.UpdateOrderStatusRequest
 
@@ -141,14 +151,14 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 		err = errors.New("invalid order id")
 
 		a.logger.WithError(err).Error(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorNotFound.CustomMessage(err.Error()), nil)
 		return
 	}
 
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		a.logger.WithError(err).Error(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInternalServer.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -159,8 +169,38 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 
 	order, err := a.orderService.UpdateOrderStatus(id, req.Status)
 	if err != nil {
+		if err == e.ErrOrderStatusInvalid {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInvalidPayload.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrOrderNotFound {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorNotFound.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrOrderStatusPendingValidation {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrOrderStatusConfirmValidation {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrOrderStatusShippedValidation {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		if err == e.ErrOrderStatusFinal {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorBadRequest.CustomMessage(err.Error()), nil)
+			return
+		}
+
 		a.logger.WithError(err).Error(err.Error())
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInternalServer.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -178,13 +218,13 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }
 
-// @Tags Order
-// @Summary Get Order by Order ID
-// @Description "Get an Order by Order ID"
-// @Accept json
-// @Produce json
-// @Success 200 {object} httputils.BaseResponse
-// @Router /orders/{id} [get]
+// @Tags			Order
+// @Summary		Get Order by Order ID
+// @Description	"Get an Order by Order ID"
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	httputils.BaseResponse
+// @Router			/orders/{id} [get]
 func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -207,7 +247,12 @@ func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Reques
 			"error":    err.Error(),
 		}).Warn("failed to fetch order")
 
-		httputils.MapBaseResponse(w, r, nil, err, nil)
+		if err == e.ErrOrderNotFound {
+			httputils.MapBaseResponse(w, r, nil, errorutils.ErrorNotFound.CustomMessage(err.Error()), nil)
+			return
+		}
+
+		httputils.MapBaseResponse(w, r, nil, errorutils.ErrorInternalServer.CustomMessage(err.Error()), nil)
 		return
 	}
 
@@ -232,13 +277,13 @@ func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Reques
 	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }
 
-// @Tags Order
-// @Summary Get Order List
-// @Description "Get an Order List"
-// @Accept json
-// @Produce json
-// @Success 200 {object} httputils.BaseResponse
-// @Router /orders [get]
+// @Tags			Order
+// @Summary		Get Order List
+// @Description	"Get an Order List"
+// @Accept			json
+// @Produce		json
+// @Success		200	{object}	httputils.BaseResponse
+// @Router			/orders [get]
 func (a *OrderControllerImpl) GetOrders(w http.ResponseWriter, r *http.Request) {
 	pageStr := r.URL.Query().Get("page")
 	awb := strings.TrimSpace(r.URL.Query().Get("awb"))
