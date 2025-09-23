@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/dto"
 	"github.com/audricimanuel/awb-stock-allocation/src/internals/service"
@@ -21,6 +22,7 @@ type (
 		CreateOrder(w http.ResponseWriter, r *http.Request)
 		GetOrderById(w http.ResponseWriter, r *http.Request)
 		UpdateOrderStatus(w http.ResponseWriter, r *http.Request)
+		GetOrders(w http.ResponseWriter, r *http.Request)
 	}
 
 	OrderControllerImpl struct {
@@ -42,7 +44,7 @@ func NewOrderController(orderService service.OrderService, logger *logrus.Logger
 // @Accept json
 // @Produce json
 // @Success 200 {object} httputils.BaseResponse
-// @Router /order [post]
+// @Router /orders [post]
 func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	var req *dto.CreateOrderRequest
 
@@ -123,6 +125,13 @@ func (a *OrderControllerImpl) CreateOrder(w http.ResponseWriter, r *http.Request
 	httputils.MapBaseResponse(w, r, resp, err, &meta)
 }
 
+// @Tags Order
+// @Summary Update Order Status
+// @Description "Update an Order Status"
+// @Accept json
+// @Produce json
+// @Success 200 {object} httputils.BaseResponse
+// @Router /orders/{id}/status [put]
 func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.Request) {
 	var req *dto.UpdateOrderStatusRequest
 
@@ -169,6 +178,13 @@ func (a *OrderControllerImpl) UpdateOrderStatus(w http.ResponseWriter, r *http.R
 	httputils.MapBaseResponse(w, r, resp, nil, nil)
 }
 
+// @Tags Order
+// @Summary Get Order by Order ID
+// @Description "Get an Order by Order ID"
+// @Accept json
+// @Produce json
+// @Success 200 {object} httputils.BaseResponse
+// @Router /orders/{id} [get]
 func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -214,4 +230,46 @@ func (a *OrderControllerImpl) GetOrderById(w http.ResponseWriter, r *http.Reques
 	}).Info("successfully fetched order")
 
 	httputils.MapBaseResponse(w, r, resp, nil, nil)
+}
+
+// @Tags Order
+// @Summary Get Order List
+// @Description "Get an Order List"
+// @Accept json
+// @Produce json
+// @Success 200 {object} httputils.BaseResponse
+// @Router /orders [get]
+func (a *OrderControllerImpl) GetOrders(w http.ResponseWriter, r *http.Request) {
+	pageStr := r.URL.Query().Get("page")
+	awb := strings.TrimSpace(r.URL.Query().Get("awb"))
+
+	page := 1
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			page = p
+		}
+	}
+
+	orders, _ := a.orderService.GetOrders(page, awb)
+
+	var resp []*dto.CreateOrderResponse
+
+	for _, order := range orders {
+		r := &dto.CreateOrderResponse{
+			ID:          order.ID,
+			AWBNumber:   order.AWBNumber,
+			Sender:      order.Sender,
+			Receiver:    order.Receiver,
+			TotalWeight: order.TotalWeight,
+			TotalPrice:  order.TotalPrice,
+			Status:      order.Status,
+		}
+
+		resp = append(resp, r)
+	}
+
+	meta := httputils.SetBaseMeta(page, 5, len(orders))
+
+	a.logger.Info("get order list successful")
+	httputils.MapBaseResponse(w, r, resp, nil, &meta)
 }

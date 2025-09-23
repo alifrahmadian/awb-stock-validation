@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"strings"
 	"sync"
 
 	"github.com/audricimanuel/awb-stock-allocation/src/model"
@@ -12,6 +13,7 @@ type (
 	OrderRepository interface {
 		CreateOrder(order *model.Order) *model.Order
 		GetOrderById(id int64) (*model.Order, error)
+		GetOrders(page int, awbNumber string) ([]*model.Order, bool)
 		UpdateOrderStatus(id int64, status string) (*model.Order, error)
 	}
 
@@ -65,4 +67,33 @@ func (r *OrderRepositoryImpl) UpdateOrderStatus(id int64, status string) (*model
 	}
 
 	return nil, e.ErrOrderNotFound
+}
+
+func (r *OrderRepositoryImpl) GetOrders(page int, awbNumber string) ([]*model.Order, bool) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	var filtered []*model.Order
+	for _, order := range *r.list {
+		if awbNumber == "" || strings.Contains(order.AWBNumber, awbNumber) {
+			filtered = append(filtered, &order)
+		}
+	}
+
+	pageSize := 5
+	start := (page - 1) * pageSize
+	if start >= len(filtered) {
+		return nil, false
+	}
+
+	end := start + pageSize
+	if end > len(filtered) {
+		end = len(filtered)
+	}
+
+	hasNext := end < len(filtered)
+	result := make([]*model.Order, end-start)
+	copy(result, filtered[start:end])
+
+	return result, hasNext
 }

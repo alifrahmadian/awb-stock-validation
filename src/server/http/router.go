@@ -43,6 +43,7 @@ func RegisterRouter(
 	r.Get("/awb-stocks", awbStockHandler.GetAWBStock)
 	r.Post("/orders", orderHandler.CreateOrder)
 	r.Get("/orders/{id}", orderHandler.GetOrderById)
+	r.Get("/orders", orderHandler.GetOrders)
 	r.Put("/orders/{id}/status", orderHandler.UpdateOrderStatus)
 
 	return r

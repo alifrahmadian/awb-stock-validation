@@ -14,6 +14,7 @@ type (
 		CreateOrder(order *model.Order) (*model.Order, error)
 		UpdateOrderStatus(id int64, status int) (*model.Order, error)
 		GetOrderById(id int64) (*model.Order, error)
+		GetOrders(page int, awbNumber string) ([]*model.Order, bool)
 	}
 
 	OrderServiceImpl struct {
@@ -121,4 +122,9 @@ func (s *OrderServiceImpl) GetOrderById(id int64) (*model.Order, error) {
 	}
 
 	return order, nil
+}
+
+func (s *OrderServiceImpl) GetOrders(page int, awbNumber string) ([]*model.Order, bool) {
+	orders, hasNext := s.orderRepository.GetOrders(page, awbNumber)
+	return orders, hasNext
 }
